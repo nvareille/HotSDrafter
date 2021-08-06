@@ -1,0 +1,153 @@
+﻿@page "/Drafter"
+@using HotSDrafter.Shared
+@inject HttpClient Http
+
+<h3>Drafter</h3>
+
+@if (Heroes.Length == 0 && Maps.Length == 0)
+{
+    <h1>Loading</h1>
+}
+else
+{
+    <div>
+        <select name="rank" @bind="@Rank">
+            <option value="@Rank.None">Select a Rank</option>
+            <option value="@Rank.Bronze">Bronze</option>
+            <option value="@Rank.Silver">Silver</option>
+            <option value="@Rank.Gold">Gold</option>
+            <option value="@Rank.Platinum">Platinum</option>
+            <option value="@Rank.Diamond">Diamond</option>
+            <option value="@Rank.Master">Master</option>
+        </select>
+        
+        @if (Rank != Rank.None)
+        {
+            <select name="map" @onchange="UpdateBestMapPicks">
+                <option value="">Select a Map</option>
+                @foreach (Map map in Maps)
+                {
+                    <option value="@map.Name">@map.Name</option>
+                }
+            </select>
+        }
+    </div>
+    
+    @if (Rank != Rank.None && !string.IsNullOrWhiteSpace(Map))
+    {
+        <div>
+            <select name="hero" @bind="@HeroToPick">
+                <option value="">Select a Hero</option>
+                @foreach (Hero hero in AvailableHeroes)
+                {
+                    <option value="@hero.Name">@hero.Name</option>
+                }
+            </select>
+        </div>
+        <div>
+            @if (Bans.Any(i => i == null))
+            {
+                <button @onclick="BanHero" class="btn btn-warning">Ban</button>
+            }
+            @if (Teams[0].Any(i => i == null))
+            {
+                <button @onclick="() => PickHero(0)" class="btn btn-primary">Pick</button>
+            }
+            @if (Teams[1].Any(i => i == null))
+            {
+                <button @onclick="() => PickHero(1)" class="btn btn-danger">Ennemy</button>
+            }
+        </div>
+    
+        <table>
+            <thead>
+            <tr>
+                @foreach (Hero ban in Bans)
+                {
+                    string img = (ban != null ? ban.ImageUrl : "");
+                    <th class="ban-cell"><img src="@img" /></th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            @for (int i = 0; i < 5; ++i)
+            {
+                string img1 = (Teams[0][i] != null ? Teams[0][i].ImageUrl : "");
+                string img2 = (Teams[1][i] != null ? Teams[1][i].ImageUrl : "");
+                <tr>
+                    <td colspan="3" class="ally"><img src="@img1"/></td>
+                    <td colspan="3" class="ennemy"><img src="@img2" /></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        
+    }
+}
+
+<h2>Bests picks for the map</h2>
+<table>
+@foreach (HeroResult result in BestPicks)
+{
+    <tr>
+        <td><img src="@result.Hero.ImageUrl"></td>
+        <td>@result.WinRate</td>
+    </tr>
+}
+</table>
+@code
+{
+    Rank Rank = Rank.None;
+    string HeroToPick;
+    string Map;
+
+    Map[] Maps = new Map[0];
+    Hero[] Heroes = new Hero[0];
+    IEnumerable<HeroResult> BestPicks = new HeroResult[0];
+    List<Hero> AvailableHeroes = new List<Hero>();
+
+    Hero[][] Teams = new Hero[][]
+    {
+        new Hero[5],
+        new Hero[5]
+    };
+
+    Hero[] Bans = new Hero[6];
+
+    protected override async Task OnInitializedAsync()
+    {
+        Heroes = await Http.GetFromJsonAsync<Hero[]>("Static/Heroes");
+        Maps = await Http.GetFromJsonAsync<Map[]>("Static/Maps");
+
+        Maps = Maps.OrderBy(i => i.Name).ToArray();
+        AvailableHeroes = Heroes.Select(i => i).ToList();
+    }
+
+    private void BanHero()
+    {
+        int idx = Array.IndexOf(Bans, null);
+        Hero hero = AvailableHeroes.FirstOrDefault(i => i.Name == HeroToPick);
+
+        AvailableHeroes.Remove(hero);
+        Bans[idx] = hero;
+        HeroToPick = "";
+    }
+
+    private void PickHero(int team)
+    {
+        int idx = Array.IndexOf(Teams[team], null);
+        Hero hero = AvailableHeroes.FirstOrDefault(i => i.Name == HeroToPick);
+
+        AvailableHeroes.Remove(hero);
+        Teams[team][idx] = hero;
+        HeroToPick = "";
+    }
+
+    private async void UpdateBestMapPicks(ChangeEventArgs e)
+    {
+        Map = e.Value.ToString();
+
+        BestPicks = await Http.GetFromJsonAsync<IEnumerable<HeroResult>>($@"Pick/BestForMapAndRank?map={Map}&rank={Rank}");
+    }
+}

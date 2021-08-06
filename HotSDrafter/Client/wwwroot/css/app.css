@@ -48,3 +48,28 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+table,
+td {
+    border: 1px solid #333;
+}
+
+thead,
+tfoot {
+    border: 1px solid #333;
+    
+    color: #fff;
+}
+
+.ban-cell
+{
+    background-color: #f00;
+}
+
+.ally {
+    background-color: #0366d6
+}
+
+.ennemy {
+    background-color: #f99
+}

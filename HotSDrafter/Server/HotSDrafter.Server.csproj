@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\HotSLogsScrapper\HotSLogsScrapper.csproj" />
     <ProjectReference Include="..\Client\HotSDrafter.Client.csproj" />
     <ProjectReference Include="..\Shared\HotSDrafter.Shared.csproj" />
   </ItemGroup>

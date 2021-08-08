@@ -25,9 +25,17 @@ namespace HotSLogsScrapper
 
         public UnformattedData Then(string xpath)
         {
+            IEnumerable<HtmlNode> nodes = null;
+            
+            try
+            {
+                nodes = Nodes.Select(i => i.SelectNodes(xpath)).SelectMany(i => i).ToList();
+            }
+            catch (Exception) { }
+
             return (new UnformattedData
             {
-                Nodes = Nodes.Select(i => i.SelectNodes(xpath)).SelectMany(i => i)
+                Nodes = nodes
             });
         }
 
@@ -51,7 +59,10 @@ namespace HotSLogsScrapper
 
         public string ExtractAttribute(string attribute, string def = "")
         {
-            return (Nodes.First().GetAttributeValue(attribute, def));
+            return (Nodes
+                .First()
+                .GetAttributeValue(attribute, def)
+                .Replace("&#39;", "'"));
         }
 
         public string ExtractContent(char takeWhile)

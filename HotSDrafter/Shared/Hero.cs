@@ -126,5 +126,10 @@ namespace HotSDrafter.Shared
             new Hero("Zeratul", HeroRole.MeleeAssassin),
             new Hero("Zul'jin", HeroRole.RangedAssassin),
         };
+
+        public static Hero GetWithName(string name)
+        {
+            return (Heroes.First(i => i.Name == name));
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿@page "/Drafter"
 @using HotSDrafter.Shared
+@using System.Threading
 @inject HttpClient Http
 
 <h3>Drafter</h3>
@@ -21,90 +22,137 @@ else
             <option value="@Rank.Master">Master</option>
         </select>
         
-        @if (Rank != Rank.None)
+        <select name="map" @bind="@Map">
+            <option value="">Select a Map</option>
+            @foreach (Map map in Maps)
+            {
+                <option value="@map.Name">@map.Name</option>
+            }
+        </select>
+        
+    </div>
+
+    <div>
+        <select name="hero" @bind="@HeroToPick">
+            <option value="">Select a Hero</option>
+            @foreach (Hero hero in AvailableHeroes)
+            {
+                <option value="@hero.Name">@hero.Name</option>
+            }
+        </select>
+
+        @if (Bans.Any(i => i == null))
         {
-            <select name="map" @onchange="UpdateBestMapPicks">
-                <option value="">Select a Map</option>
-                @foreach (Map map in Maps)
-                {
-                    <option value="@map.Name">@map.Name</option>
-                }
-            </select>
+            <button @onclick="BanHero" class="btn btn-warning">Ban</button>
+        }
+        @if (Teams[0].Any(i => i == null))
+        {
+            <button @onclick="() => PickHero(0)" class="btn btn-primary">Pick</button>
+        }
+        @if (Teams[1].Any(i => i == null))
+        {
+            <button @onclick="() => PickHero(1)" class="btn btn-danger">Ennemy</button>
         }
     </div>
-    
-    @if (Rank != Rank.None && !string.IsNullOrWhiteSpace(Map))
-    {
-        <div>
-            <select name="hero" @bind="@HeroToPick">
-                <option value="">Select a Hero</option>
-                @foreach (Hero hero in AvailableHeroes)
-                {
-                    <option value="@hero.Name">@hero.Name</option>
-                }
-            </select>
-        </div>
-        <div>
-            @if (Bans.Any(i => i == null))
+    <div>
+        
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            @foreach (Hero ban in Bans)
             {
-                <button @onclick="BanHero" class="btn btn-warning">Ban</button>
+                string img = (ban != null ? ban.ImageUrl : "");
+                <th class="ban-cell"><img src="@img" /></th>
             }
-            @if (Teams[0].Any(i => i == null))
-            {
-                <button @onclick="() => PickHero(0)" class="btn btn-primary">Pick</button>
-            }
-            @if (Teams[1].Any(i => i == null))
-            {
-                <button @onclick="() => PickHero(1)" class="btn btn-danger">Ennemy</button>
-            }
-        </div>
-    
-        <table>
-            <thead>
+        </tr>
+        </thead>
+        <tbody>
+        @for (int i = 0; i < 5; ++i)
+        {
+            string img1 = (Teams[0][i] != null ? Teams[0][i].ImageUrl : "");
+            string img2 = (Teams[1][i] != null ? Teams[1][i].ImageUrl : "");
+
+            string name1 = (Teams[0][i] != null ? Teams[0][i].Name : "");
+            string name2 = (Teams[1][i] != null ? Teams[1][i].Name : "");
+
             <tr>
-                @foreach (Hero ban in Bans)
-                {
-                    string img = (ban != null ? ban.ImageUrl : "");
-                    <th class="ban-cell"><img src="@img" /></th>
-                }
+                <td colspan="3" class="ally"><img @onclick="() => UpdateMatchups(name1, 1)" src="@img1"/></td>
+                <td colspan="3" class="ennemy"><img @onclick="() => UpdateMatchups(name2, 0)"src="@img2" /></td>
             </tr>
-            </thead>
-            <tbody>
-            @for (int i = 0; i < 5; ++i)
+        }
+        </tbody>
+    </table>
+
+    if (Advice != null)
+    {
+<div style="display: flex">
+    <div style="margin-right: 200px;">
+        <h2>Bests picks for the map</h2>
+        <table>
+            @foreach (HeroWinrate result in Advice.MapPicks)
             {
-                string img1 = (Teams[0][i] != null ? Teams[0][i].ImageUrl : "");
-                string img2 = (Teams[1][i] != null ? Teams[1][i].ImageUrl : "");
                 <tr>
-                    <td colspan="3" class="ally"><img src="@img1"/></td>
-                    <td colspan="3" class="ennemy"><img src="@img2" /></td>
+                    <td><img @onclick="() => UpdateMatchups(result.Hero.Name, 1)" src="@result.Hero.ImageUrl"></td>
+                    <td>@result.WinRate %</td>
                 </tr>
             }
-            </tbody>
         </table>
+    </div>
 
-        
+    <div style="margin-right: 200px;">
+        <h2>Bests counters</h2>
+        <table>
+            @foreach (HeroWinrate result in Advice.Counters)
+            {
+                <tr>
+                    <td><img @onclick="() => UpdateMatchups(result.Hero.Name, 1)" src="@result.Hero.ImageUrl"></td>
+                    <td>@result.WinRate %</td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <div>
+        <h2>Matchups</h2>
+        <table>
+            @foreach (HeroWinrate result in Matchups)
+            {
+                <tr>
+                    <td><img src="@result.Hero.ImageUrl"></td>
+                    <td>@result.WinRate %</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
     }
 }
 
-<h2>Bests picks for the map</h2>
-<table>
-@foreach (HeroResult result in BestPicks)
-{
-    <tr>
-        <td><img src="@result.Hero.ImageUrl"></td>
-        <td>@result.WinRate</td>
-    </tr>
-}
-</table>
+
+
 @code
 {
     Rank Rank = Rank.None;
     string HeroToPick;
-    string Map;
+
+    string Map
+    {
+        get => _Map;
+        set
+        {
+            _Map = value;
+            UpdateBestMapPicks();
+        }
+    }
+
+    string _Map;
 
     Map[] Maps = new Map[0];
     Hero[] Heroes = new Hero[0];
-    IEnumerable<HeroResult> BestPicks = new HeroResult[0];
+    DraftAdvice Advice;
+    IEnumerable<HeroWinrate> Matchups = Array.Empty<HeroWinrate>();
     List<Hero> AvailableHeroes = new List<Hero>();
 
     Hero[][] Teams = new Hero[][]
@@ -132,6 +180,7 @@ else
         AvailableHeroes.Remove(hero);
         Bans[idx] = hero;
         HeroToPick = "";
+        UpdateBestMapPicks();
     }
 
     private void PickHero(int team)
@@ -142,12 +191,35 @@ else
         AvailableHeroes.Remove(hero);
         Teams[team][idx] = hero;
         HeroToPick = "";
+        UpdateBestMapPicks();
     }
 
-    private async void UpdateBestMapPicks(ChangeEventArgs e)
+    private string GenerateTeamString(int id)
     {
-        Map = e.Value.ToString();
+        Hero[] heroes = Bans;
 
-        BestPicks = await Http.GetFromJsonAsync<IEnumerable<HeroResult>>($@"Pick/BestForMapAndRank?map={Map}&rank={Rank}");
+        if (id < 2)
+            heroes = Teams[id];
+
+        string str = heroes.Where(i => i != null).Aggregate("", (s, hero) => s + hero.Name + ";");
+
+        if (str == "")
+            str = ";";
+
+        return (str);
+    }
+
+    private async void UpdateBestMapPicks()
+    {
+        Advice = await Http.GetFromJsonAsync<DraftAdvice>($@"Pick/Advise/{Map}/{Rank}/{GenerateTeamString(0)}/{GenerateTeamString(1)}/{GenerateTeamString(2)}");
+        
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async void UpdateMatchups(string hero, int team)
+    {
+        Matchups = await Http.GetFromJsonAsync<IEnumerable<HeroWinrate>>($"Pick/Matchups/{Rank}/{hero}/{GenerateTeamString(team)}");
+
+        InvokeAsync(StateHasChanged);
     }
 }

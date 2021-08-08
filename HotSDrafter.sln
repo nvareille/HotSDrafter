@@ -3,15 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotSDrafter.Server", "HotSDrafter\Server\HotSDrafter.Server.csproj", "{6F465F04-563F-46CC-9EF6-3C6D346978B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotSDrafter.Server", "HotSDrafter\Server\HotSDrafter.Server.csproj", "{6F465F04-563F-46CC-9EF6-3C6D346978B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotSDrafter.Client", "HotSDrafter\Client\HotSDrafter.Client.csproj", "{84FD38C3-D11F-413D-A7EC-B457860C2170}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotSDrafter.Client", "HotSDrafter\Client\HotSDrafter.Client.csproj", "{84FD38C3-D11F-413D-A7EC-B457860C2170}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotSDrafter.Shared", "HotSDrafter\Shared\HotSDrafter.Shared.csproj", "{B4A7FA73-0EC9-4402-BF3C-952E76B9CC2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotSDrafter.Shared", "HotSDrafter\Shared\HotSDrafter.Shared.csproj", "{B4A7FA73-0EC9-4402-BF3C-952E76B9CC2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotSLogsScrapper", "HotSLogsScrapper\HotSLogsScrapper.csproj", "{68008448-3D95-4734-908E-393223E54D6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HotSLogsScrapper", "HotSLogsScrapper\HotSLogsScrapper.csproj", "{68008448-3D95-4734-908E-393223E54D6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectTests", "ProjectTests\ProjectTests.csproj", "{31E4ABE3-5C70-4DA6-A316-AB63C310B470}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectTests", "ProjectTests\ProjectTests.csproj", "{31E4ABE3-5C70-4DA6-A316-AB63C310B470}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataScrapper", "DataScrapper\DataScrapper.csproj", "{BFFB0D93-99BB-46E0-8F1A-D74A7C48B92C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkromTaskPool", "SkromTaskPool\SkromTaskPool.csproj", "{98FBB956-DD2D-47F5-911B-6805C2702C3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +43,14 @@ Global
 		{31E4ABE3-5C70-4DA6-A316-AB63C310B470}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E4ABE3-5C70-4DA6-A316-AB63C310B470}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31E4ABE3-5C70-4DA6-A316-AB63C310B470}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFFB0D93-99BB-46E0-8F1A-D74A7C48B92C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFFB0D93-99BB-46E0-8F1A-D74A7C48B92C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFFB0D93-99BB-46E0-8F1A-D74A7C48B92C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFFB0D93-99BB-46E0-8F1A-D74A7C48B92C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98FBB956-DD2D-47F5-911B-6805C2702C3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98FBB956-DD2D-47F5-911B-6805C2702C3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98FBB956-DD2D-47F5-911B-6805C2702C3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98FBB956-DD2D-47F5-911B-6805C2702C3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

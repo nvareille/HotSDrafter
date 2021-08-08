@@ -8,7 +8,12 @@ namespace HotSDrafter.Shared
 {
     public class HeroResult
     {
-        public Hero Hero { get; set; }
-        public string WinRate { get; set; }
+        /*Talents*/
+        public Hero Hero;
+        public IEnumerable<HeroWinrate> Matchups;
+        public IEnumerable<HeroWinrate> Duos;
+        public IEnumerable<MapWinrate> Maps;
+        public IEnumerable<TalentWinrate> Talents;
+
     }
 }

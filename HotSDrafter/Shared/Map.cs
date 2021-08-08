@@ -36,5 +36,10 @@ namespace HotSDrafter.Shared
             new Map("Volskaya Foundry"),
             new Map("Warhead Junction")
         };
+
+        public static Map GetWithName(string name)
+        {
+            return (Maps.First(i => i.Name == name));
+        }
     }
 }

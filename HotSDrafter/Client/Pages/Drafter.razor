@@ -30,6 +30,16 @@ else
             }
         </select>
         
+        <div class="d-flex">
+            
+            @foreach (HeroRole role in AvailableRoles)
+            {
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="@role" @bind="@SelectedRoles[role]">
+                    <label class="form-check-label" for="@role">@role</label>
+                </div>
+            }
+        </div>
     </div>
 
     <div>
@@ -54,80 +64,84 @@ else
             <button @onclick="() => PickHero(1)" class="btn btn-danger">Ennemy</button>
         }
     </div>
-    <div>
+
+    <div class="d-flex">
+        <div class="w-50">
+            <table>
+                <thead>
+                <tr>
+                    @foreach (Hero ban in Bans)
+                    {
+                        string img = (ban != null ? ban.ImageUrl : "");
+                        <th class="ban-cell" style="width: 75px"><img src="@img" /></th>
+                    }
+                </tr>
+                </thead>
+                <tbody>
+                @for (int i = 0; i < 5; ++i)
+                {
+                    string img1 = (Teams[0][i] != null ? Teams[0][i].ImageUrl : "");
+                    string img2 = (Teams[1][i] != null ? Teams[1][i].ImageUrl : "");
+
+                    string name1 = (Teams[0][i] != null ? Teams[0][i].Name : "");
+                    string name2 = (Teams[1][i] != null ? Teams[1][i].Name : "");
+
+                    <tr>
+                        <td colspan="3" class="ally"><img @onclick="() => UpdateMatchups(name1, 1)" src="@img1"/></td>
+                        <td colspan="3" class="ennemy"><img @onclick="() => UpdateMatchups(name2, 0)"src="@img2" /></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
         
+        <div class="w-50">
+            @if (Advice != null)
+            {
+            <div style="display: flex">
+                <div style="margin-right: 200px;">
+                    <h2>Bests picks for the map</h2>
+                    <table>
+                        @foreach (HeroWinrate result in Advice.MapPicks)
+                        {
+                            <tr>
+                                <td><img @onclick="() => UpdateMatchups(result.Hero.Name, 1)" src="@result.Hero.ImageUrl"></td>
+                                <td>@result.WinRate %</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+
+                <div style="margin-right: 200px;">
+                    <h2>Bests counters</h2>
+                    <table>
+                        @foreach (HeroWinrate result in Advice.Counters)
+                        {
+                            <tr>
+                                <td><img @onclick="() => UpdateMatchups(result.Hero.Name, 1)" src="@result.Hero.ImageUrl"></td>
+                                <td>@result.WinRate %</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+
+                <div>
+                    <h2>Matchups</h2>
+                    <table>
+                        @foreach (HeroWinrate result in Matchups)
+                        {
+                            <tr>
+                                <td><img src="@result.Hero.ImageUrl"></td>
+                                <td>@result.WinRate %</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+            }
+        </div>
     </div>
 
-    <table>
-        <thead>
-        <tr>
-            @foreach (Hero ban in Bans)
-            {
-                string img = (ban != null ? ban.ImageUrl : "");
-                <th class="ban-cell"><img src="@img" /></th>
-            }
-        </tr>
-        </thead>
-        <tbody>
-        @for (int i = 0; i < 5; ++i)
-        {
-            string img1 = (Teams[0][i] != null ? Teams[0][i].ImageUrl : "");
-            string img2 = (Teams[1][i] != null ? Teams[1][i].ImageUrl : "");
-
-            string name1 = (Teams[0][i] != null ? Teams[0][i].Name : "");
-            string name2 = (Teams[1][i] != null ? Teams[1][i].Name : "");
-
-            <tr>
-                <td colspan="3" class="ally"><img @onclick="() => UpdateMatchups(name1, 1)" src="@img1"/></td>
-                <td colspan="3" class="ennemy"><img @onclick="() => UpdateMatchups(name2, 0)"src="@img2" /></td>
-            </tr>
-        }
-        </tbody>
-    </table>
-
-    if (Advice != null)
-    {
-<div style="display: flex">
-    <div style="margin-right: 200px;">
-        <h2>Bests picks for the map</h2>
-        <table>
-            @foreach (HeroWinrate result in Advice.MapPicks)
-            {
-                <tr>
-                    <td><img @onclick="() => UpdateMatchups(result.Hero.Name, 1)" src="@result.Hero.ImageUrl"></td>
-                    <td>@result.WinRate %</td>
-                </tr>
-            }
-        </table>
-    </div>
-
-    <div style="margin-right: 200px;">
-        <h2>Bests counters</h2>
-        <table>
-            @foreach (HeroWinrate result in Advice.Counters)
-            {
-                <tr>
-                    <td><img @onclick="() => UpdateMatchups(result.Hero.Name, 1)" src="@result.Hero.ImageUrl"></td>
-                    <td>@result.WinRate %</td>
-                </tr>
-            }
-        </table>
-    </div>
-
-    <div>
-        <h2>Matchups</h2>
-        <table>
-            @foreach (HeroWinrate result in Matchups)
-            {
-                <tr>
-                    <td><img src="@result.Hero.ImageUrl"></td>
-                    <td>@result.WinRate %</td>
-                </tr>
-            }
-        </table>
-    </div>
-</div>
-    }
 }
 
 
@@ -136,6 +150,9 @@ else
 {
     Rank Rank = Rank.None;
     string HeroToPick;
+
+    IEnumerable<HeroRole> AvailableRoles = Enum.GetValues<HeroRole>();
+    Dictionary<HeroRole, bool> SelectedRoles = new Dictionary<HeroRole, bool>();
 
     string Map
     {
@@ -165,11 +182,26 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        InitializeCheckBoxes();
+
         Heroes = await Http.GetFromJsonAsync<Hero[]>("Static/Heroes");
         Maps = await Http.GetFromJsonAsync<Map[]>("Static/Maps");
 
         Maps = Maps.OrderBy(i => i.Name).ToArray();
         AvailableHeroes = Heroes.Select(i => i).ToList();
+    }
+
+    protected void Debug(string str)
+    {
+        Console.WriteLine(str);
+    }
+
+    private void InitializeCheckBoxes()
+    {
+        foreach (HeroRole role in AvailableRoles)
+        {
+            SelectedRoles[role] = true;
+        }
     }
 
     private void BanHero()
@@ -212,7 +244,9 @@ else
     private async void UpdateBestMapPicks()
     {
         Advice = await Http.GetFromJsonAsync<DraftAdvice>($@"Pick/Advise/{Map}/{Rank}/{GenerateTeamString(0)}/{GenerateTeamString(1)}/{GenerateTeamString(2)}");
-        
+
+        Advice.Counters = Advice.Counters.Where(i => i.Hero.Roles.Any(o => SelectedRoles[o]));
+        Advice.MapPicks = Advice.MapPicks.Where(i => i.Hero.Roles.Any(o => SelectedRoles[o]));
         InvokeAsync(StateHasChanged);
     }
 

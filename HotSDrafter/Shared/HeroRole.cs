@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HotSDrafter.Shared
 {
-    public enum HeroRole
+    public enum HeroRole : int
     {
         Healer,
         Tank,
